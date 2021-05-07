@@ -1,1 +1,1 @@
-worker: bin/covalent-discord-bot
+worker: go run main.go
