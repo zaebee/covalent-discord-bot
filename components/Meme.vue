@@ -11,7 +11,7 @@
         style="overflow: hidden; height: 18rem;"
         class="mb-2 rounded-0"/>
       <b-card-title>@{{ meme.Author.Username }}</b-card-title>
-      <b-card-text>2 hours ago</b-card-text>
+      <b-card-text>{{ $moment(meme.Timestamp).fromNow() }}</b-card-text>
     </b-card>
   </b-col>
 </template>
@@ -28,6 +28,7 @@ interface User {
 interface Meme {
   Url: string
   Author: User
+  Timestamp: Date
 }
 
 export default Vue.extend({
