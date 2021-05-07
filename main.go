@@ -59,7 +59,7 @@ func main() {
 				}
 				res, _ := es.Index("memes", esutil.NewJSONReader(&meme))
 				fmt.Println(res)
-				answer := fmt.Sprintf("Jaja! Your meme was saved `%v`", a.URL)
+				answer := fmt.Sprintf("Jaja! Your meme was saved `%v\nCheck it https://cqt-memes.herokuapp.com/`", a.URL)
 				client.Channel.Send(msg.ChannelId, answer)
 			}
 		}
