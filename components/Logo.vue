@@ -1,11 +1,11 @@
 <template>
-  <img height="120px" src="~/assets/logo.png"/>
+  <img alt="Covalent" class="logo" height="120px" src="~/assets/logo.png"/>
 </template>
 
 <style>
-.NuxtLogo {
+.logo {
   animation: 1s appear;
-  margin: auto;
+  margin: 2rem auto 0;
 }
 
 @keyframes appear {

@@ -31,6 +31,15 @@ export default {
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
+  env: {
+    ELASTICSEARCH_URL: process.env.ELASTICSEARCH_URL,
+    environment: process.env.NODE_ENV || 'development',
+  },
+  axios: {
+    timeout: 30000,
+    baseURL: process.env.ELASTICSEARCH_URL,
+    headers: {'X-Requested-With': 'XMLHttpRequest'},
+  },
 
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
@@ -40,6 +49,7 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
+    '@nuxtjs/axios',
     // https://go.nuxtjs.dev/bootstrap
     'bootstrap-vue/nuxt',
   ],

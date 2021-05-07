@@ -5,39 +5,49 @@
       <h1 class="title">
         memes
       </h1>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--grey"
-        >
-          GitHub
-        </a>
+      <b-container class="mt-4">
+        <b-row>
+          <Meme v-for="meme in getMemes" :key="meme._id" :meme="meme._source"></Meme>
+        </b-row>
+        <b-row>
+        </b-row>
+      </b-container>
+      <b-container id="more">
+        <div class="links">
+            <a
+              href="#more"
+              class="btn button--green"
+            >More</a>
       </div>
+      </b-container>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import { RootState } from '~/store'
+import Logo from '~/components/Logo.vue'
+import Meme from "~/components/Meme.vue";
 
-export default Vue.extend({})
+export default Vue.extend({
+  components: {Meme, Logo},
+  async fetch ({ store }) {
+    await store.dispatch('fetchMemes')
+  },
+  computed: {
+    getMemes () {
+      return (this.$store.state as RootState).memes
+    }
+  }
+})
 </script>
 
 <style>
 .container {
   margin: 0 auto;
   min-height: 100vh;
-  display: flex;
+  /*display: flex;*/
   justify-content: center;
   align-items: center;
   text-align: center;
@@ -59,14 +69,6 @@ export default Vue.extend({})
   font-size: 100px;
   color: #35495e;
   letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
 }
 
 .links {
