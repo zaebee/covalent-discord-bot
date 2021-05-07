@@ -2,18 +2,38 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/Goscord/goscord"
 	"github.com/Goscord/goscord/discord"
 	"github.com/Goscord/goscord/gateway"
+	"github.com/elastic/go-elasticsearch/v7"
+	"github.com/elastic/go-elasticsearch/v7/esutil"
 )
 
 var client *gateway.Session
 
+type Author struct {
+	ID       string
+	Username string
+	Avatar   string
+}
+
+type Meme struct {
+	Url    string
+	Author Author
+}
+
 func main() {
 	fmt.Println("Starting...")
-
+	esHost := os.Getenv("ELASTICSEARCH_URL")
+	es, err := elasticsearch.NewClient(elasticsearch.Config{
+		Addresses: []string{esHost},
+	})
+	if err != nil {
+		log.Fatalf("Error creating the client: %v", err)
+	}
 	client = goscord.New(&gateway.Options{
 		Token: os.Getenv("TOKEN"),
 	})
@@ -21,17 +41,24 @@ func main() {
 	client.On("ready", func() {
 		fmt.Println("Logged in as " + client.Me().Tag())
 	})
-
 	client.On("message", func(msg *discord.Message) {
-		fmt.Printf("message author: %+v\n", msg.Author)
 		if len(msg.Attachments) > 0 {
-			var urls []string
-			for _, a := range msg.Attachments {
-				urls = append(urls, a.URL)
+			author := Author{
+				ID:       msg.Author.Id,
+				Username: msg.Author.Username,
+				Avatar:   msg.Author.Avatar,
 			}
-			fmt.Printf("attaches urls: %+v\n", urls)
-			answer := fmt.Sprintf("Jaja! I saved your meme %v", urls)
-			client.Channel.Send(msg.ChannelId, answer)
+			fmt.Printf("New meme from author: %+V\n", author)
+			for _, a := range msg.Attachments {
+				meme := Meme{
+					Url:    a.URL,
+					Author: author,
+				}
+				res, _ := es.Index("memes", esutil.NewJSONReader(&meme))
+				fmt.Println(res)
+				answer := fmt.Sprintf("Jaja! Your meme was saved `%v`", a.URL)
+				client.Channel.Send(msg.ChannelId, answer)
+			}
 		}
 		if msg.Content == "ping" {
 			client.Channel.Send(msg.ChannelId, "Pong ! 🏓")
