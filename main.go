@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/Goscord/goscord"
 	"github.com/Goscord/goscord/discord"
@@ -21,8 +22,9 @@ type Author struct {
 }
 
 type Meme struct {
-	Url    string
-	Author Author
+	Url       string
+	Author    Author
+	Timestamp time.Time
 }
 
 func main() {
@@ -48,11 +50,12 @@ func main() {
 				Username: msg.Author.Username,
 				Avatar:   msg.Author.Avatar,
 			}
-			fmt.Printf("New meme from author: %+V\n", author)
+			fmt.Printf("New meme from author: %+v\n", author)
 			for _, a := range msg.Attachments {
 				meme := Meme{
-					Url:    a.URL,
-					Author: author,
+					Url:       a.URL,
+					Author:    author,
+					Timestamp: msg.Timestamp,
 				}
 				res, _ := es.Index("memes", esutil.NewJSONReader(&meme))
 				fmt.Println(res)
