@@ -11,7 +11,7 @@
         style="overflow: hidden; height: 18rem;"
         class="mb-2 rounded-0"/>
       <b-card-title>
-        <b-avatar variant="info" :src="avatar"></b-avatar>
+        <b-avatar :src="avatar"></b-avatar>
         @{{ meme.Author.Username }}
       </b-card-title>
       <b-card-text>{{ $moment(meme.Timestamp).fromNow() }}</b-card-text>
@@ -44,7 +44,9 @@ export default Vue.extend({
   },
   computed: {
     avatar () {
-      return `https://cdn.discordapp.com/avatars/${this.meme.Author.ID}/${this.meme.Author.Avatar}.png?size=256`
+      let userID = this.meme.Author.ID
+      let avatar = this.meme.Author.Avatar
+      return `https://cdn.discordapp.com/avatars/${userID}/${avatar}.png?size=64`
     }
   }
 })

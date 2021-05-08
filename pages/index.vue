@@ -7,7 +7,10 @@
       </h1>
       <b-container class="mt-4">
         <b-row>
-          <Meme v-for="meme in getMemes" :key="meme._id" :meme="meme._source"></Meme>
+          <Meme
+            v-for="meme in getMemes"
+            :key="meme._id"
+            :meme="meme._source"/>
         </b-row>
         <b-row>
         </b-row>
