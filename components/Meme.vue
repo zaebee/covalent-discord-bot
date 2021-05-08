@@ -10,7 +10,10 @@
         :alt="meme.Author.Username"
         style="overflow: hidden; height: 18rem;"
         class="mb-2 rounded-0"/>
-      <b-card-title>@{{ meme.Author.Username }}</b-card-title>
+      <b-card-title>
+        <b-avatar variant="info" :src="avatar"></b-avatar>
+        @{{ meme.Author.Username }}
+      </b-card-title>
       <b-card-text>{{ $moment(meme.Timestamp).fromNow() }}</b-card-text>
     </b-card>
   </b-col>
@@ -38,6 +41,11 @@ export default Vue.extend({
       type: Object,
       required: true
     } as PropOptions<Meme>
+  },
+  computed: {
+    avatar () {
+      return `https://cdn.discordapp.com/avatars/${this.meme.Author.ID}/${this.meme.Author.Avatar}.png?size=256`
+    }
   }
 })
 </script>
