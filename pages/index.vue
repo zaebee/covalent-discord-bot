@@ -31,7 +31,7 @@
 import Vue from 'vue'
 import { RootState } from '~/store'
 import Logo from '~/components/Logo.vue'
-import Meme from "~/components/Meme.vue";
+import Meme from "~/components/Meme.vue"
 
 export default Vue.extend({
   components: {Meme, Logo},

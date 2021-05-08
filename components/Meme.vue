@@ -1,5 +1,5 @@
 <template>
-  <b-col cols="4">
+  <b-col md="4" sm="auto">
     <b-card
       tag="article"
       class="mb-4"

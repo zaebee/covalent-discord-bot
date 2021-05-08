@@ -1,5 +1,9 @@
 <template>
-  <img alt="Covalent" class="logo" height="120px" src="~/assets/logo.png"/>
+  <b-img
+    alt="Covalent"
+    class="logo"
+    fluid-grow
+    src="~/assets/logo.png"/>
 </template>
 
 <style>
