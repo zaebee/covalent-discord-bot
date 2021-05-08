@@ -2,7 +2,7 @@
   <b-img
     alt="Covalent"
     class="logo"
-    fluid-grow
+    fluid
     src="~/assets/logo.png"/>
 </template>
 
