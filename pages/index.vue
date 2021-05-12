@@ -1,40 +1,32 @@
 <template>
-  <div class="container">
-    <div>
-      <Logo />
-      <h1 class="title">
-        memes
-      </h1>
-      <b-container class="mt-4">
-        <b-row>
-          <Meme
-            v-for="meme in getMemes"
-            :key="meme._id"
-            :meme="meme._source"/>
-        </b-row>
-        <b-row>
-        </b-row>
-      </b-container>
-      <b-container id="more">
-        <div class="links">
-            <a
-              href="#more"
-              class="btn button--green"
-            >More</a>
-      </div>
-      </b-container>
+  <b-container>
+    <b-row>
+      <b-col
+        v-for="meme in getMemes"
+        :key="meme._id"
+        sm="6"
+        lg="4"
+      >
+        <Meme
+          :meme="meme._source"/>
+      </b-col>
+    </b-row>
+    <div class="mt-4 text-center">
+      <button
+        class="covalent-button-pink"
+      >More</button>
     </div>
-  </div>
+  </b-container>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import { RootState } from '~/store'
-import Logo from '~/components/Logo.vue'
 import Meme from "~/components/Meme.vue"
 
 export default Vue.extend({
-  components: {Meme, Logo},
+  name: 'New',
+  components: { Meme },
   async fetch ({ store }) {
     await store.dispatch('fetchMemes')
   },
@@ -46,35 +38,22 @@ export default Vue.extend({
 })
 </script>
 
-<style>
-.container {
-  margin: 0 auto;
-  min-height: 20vh;
-  /*display: flex;*/
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
+<style lang="scss">
+.covalent-button-pink {
+  background-image: linear-gradient(to top, var(--color-covalent-turquoise) 50%, var(--color-covalent-pink) 50%);
+  background-size: 100% 200%;
+  border-radius: $border-radius;
+  color: white;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 0.75rem 4rem;
+  transition: background-position 0.2s;
 
-.title {
-  font-family:
-    'Quicksand',
-    'Source Sans Pro',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.links {
-  padding-top: 15px;
+  &:hover {
+     background-position: 0 100%;
+     color: #000426;
+   }
 }
 </style>

@@ -19,6 +19,10 @@
   "devDependencies": {
     "@nuxt/types": "^2.15.3",
     "@nuxt/typescript-build": "^2.1.0",
-    "@nuxtjs/moment": "^1.6.1"
+    "@nuxtjs/moment": "^1.6.1",
+    "@nuxtjs/style-resources": "^1.0.0",
+    "fibers": "^5.0.0",
+    "sass": "^1.32.12",
+    "sass-loader": "^10.1.1"
   }
 }
