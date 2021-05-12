@@ -1,22 +1,23 @@
 <template>
-  <b-col md="4" sm="auto">
-    <b-card
-      tag="article"
-      class="mb-4"
-    >
-      <b-img
-        fluid
-        :src="meme.Url"
-        :alt="meme.Author.Username"
-        style="overflow: hidden; height: 18rem;"
-        class="mb-2 rounded-0"/>
-      <b-card-title>
-        <b-avatar :src="avatar"></b-avatar>
+  <b-card
+    :img-src="meme.Url"
+    :img-alt="`Meme of ${meme.Author.Username}`"
+    img-top
+    tag="article"
+    class="border-0 mb-4"
+    no-body
+  >
+    <b-card-body class="px-3 py-2">
+      <b-card-title class="d-flex align-items-center justify-content-center mb-0 text-break">
+        <b-avatar :src="avatar" alt="Avatar" class="mr-2" />
         @{{ meme.Author.Username }}
       </b-card-title>
-      <b-card-text>{{ $moment(meme.Timestamp).fromNow() }}</b-card-text>
-    </b-card>
-  </b-col>
+    </b-card-body>
+    <b-card-footer footer-class="d-flex px-3 py-2 card-footer">
+      <small class="text-muted">Created {{ $moment(meme.Timestamp).fromNow() }}</small>
+      <small class="ml-auto mr-0 text-muted text-right">{{ reactionAmount }} {{ reactionAmount | pluralize('reaction') }}</small>
+    </b-card-footer>
+  </b-card>
 </template>
 
 <script lang="ts">
@@ -41,6 +42,11 @@ export default Vue.extend({
       type: Object,
       required: true
     } as PropOptions<Meme>
+  },
+  data() {
+    return {
+      reactionAmount: 2,
+    }
   },
   computed: {
     avatar () {

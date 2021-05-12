@@ -1,62 +1,41 @@
 <template>
-  <div>
+  <div id="app">
+    <b-container class="text-center">
+      <logo />
+      <h1 class="title mb-4">
+        Memes
+      </h1>
+      <navbar class="mb-4" />
+    </b-container>
     <Nuxt />
   </div>
 </template>
 
-<style>
-html {
-  font-family:
-    'Source Sans Pro',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
-  font-size: 16px;
-  word-spacing: 1px;
-  -ms-text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
-  box-sizing: border-box;
+<script>
+import Vue from 'vue'
+import Logo from '~/components/Logo'
+import Navbar from '~/components/Navbar'
+
+export default Vue.extend({
+  components: { Logo, Navbar },
+})
+</script>
+
+<style lang="scss" scoped>
+@font-face {
+  font-family: 'What is this - some kind of joke';
+  src: url('~/assets/fonts/What is this - some kind of joke.ttf') format('truetype');
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-}
+.title {
+  font-family: 'What is this - some kind of joke', sans-serif;
+  font-size: 22vw;
+  color: var(--color-covalent-gray);
+  letter-spacing: 1px;
+  text-transform: uppercase;
 
-.button--green {
-  display: inline-block;
-  border-radius: 4px;
-  border: 1px solid #3b8070;
-  color: #3b8070;
-  text-decoration: none;
-  padding: 10px 30px;
-}
-
-.button--green:hover {
-  color: #fff;
-  background-color: #3b8070;
-}
-
-.button--grey {
-  display: inline-block;
-  border-radius: 4px;
-  border: 1px solid #35495e;
-  color: #35495e;
-  text-decoration: none;
-  padding: 10px 30px;
-  margin-left: 15px;
-}
-
-.button--grey:hover {
-  color: #fff;
-  background-color: #35495e;
+  @include media-breakpoint-up(sm) {
+    font-size: 110px;
+  }
 }
 </style>

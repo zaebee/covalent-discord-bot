@@ -3,13 +3,18 @@
     alt="Covalent"
     class="logo"
     fluid
-    src="~/assets/logo.png"/>
+    src="~/assets/img/logo.png"
+    height="52"
+    width="220"
+  />
 </template>
 
-<style>
+<style lang="scss" scoped>
 .logo {
   animation: 1s appear;
-  margin: 2rem auto 0;
+  height: 52px;
+  margin: 40px auto;
+  width: 220px;
 }
 
 @keyframes appear {
