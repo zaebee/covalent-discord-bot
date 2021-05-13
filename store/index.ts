@@ -37,4 +37,24 @@ export const actions: ActionTree<RootState, RootState> = {
     }
     commit('SET_TOTAL', memes.data.hits.total)
   },
+  async fetchTopMemes({ commit }, payload) {
+    let page =(payload && payload.page) || 0
+    const memes = await $http.post('/memes/_search', {
+      query: {
+        bool: {
+          filter: [{exists: {field: 'Reactions'}}]
+        },
+      },
+      from: page * this.state.pageSize,
+      size: this.state.pageSize,
+      sort: {'Reactions.keyword': {order: 'desc'}}
+    })
+    console.log(memes.data.hits.hits)
+    if (page == 0) {
+      commit('INIT_MEMES', memes.data.hits.hits)
+    } else {
+      commit('MORE_MEMES', memes.data.hits.hits)
+    }
+    commit('SET_TOTAL', memes.data.hits.total)
+  },
 }
