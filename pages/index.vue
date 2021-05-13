@@ -11,10 +11,23 @@
           :meme="meme._source"/>
       </b-col>
     </b-row>
-    <div class="mt-4 text-center">
-      <button
-        class="covalent-button-pink"
-      >More</button>
+    <div class="text-center" v-show="hasNext">
+      <b-overlay
+        :show="busy"
+        opacity="0.6"
+        spinner-small
+        spinner-variant="secondary"
+        class="d-inline-block my-4"
+      >
+        <b-button
+          ref="button"
+          class="covalent-button-pink"
+          :disabled="busy"
+          @click="showMore"
+        >
+          More
+        </b-button>
+      </b-overlay>
     </div>
   </b-container>
 </template>
@@ -28,11 +41,29 @@ export default Vue.extend({
   name: 'New',
   components: { Meme },
   async fetch ({ store }) {
-    await store.dispatch('fetchMemes')
+    await store.dispatch('fetchMemes', { page: 0 })
+  },
+  data() {
+    return {
+      busy: false,
+      nextPage: 1,
+    }
   },
   computed: {
+    hasNext () {
+      return (this.$store.getters.hasNext as boolean)
+    },
     getMemes () {
       return (this.$store.state as RootState).memes
+    }
+  },
+  methods: {
+    showMore() {
+      this.busy = true
+      this.$store.dispatch('fetchMemes', { page: this.nextPage }).then(() => {
+        this.nextPage += 1
+        this.busy = false
+      })
     }
   }
 })
@@ -47,7 +78,6 @@ export default Vue.extend({
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5rem;
-  margin-bottom: 2rem;
   padding: 0.75rem 4rem;
   transition: background-position 0.2s;
 
