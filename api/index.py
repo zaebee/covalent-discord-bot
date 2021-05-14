@@ -7,7 +7,7 @@ from PIL import Image
 from sanic import Sanic
 from sanic.response import json
 
-app = Sanic()
+app = Sanic('CQT Memes')
 
 
 def alpha_remover(image):
@@ -23,7 +23,7 @@ def image_loader(content):
     return imagehash.colorhash(image)
 
 
-@app.route('/')
+@app.route('/hash')
 async def index(request):
     image_hash = ''
     url = request.args.get('url')
