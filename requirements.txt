@@ -4,4 +4,4 @@ numpy~=1.19.5
 ImageHash~=4.2.0
 Pillow~=8.2.0
 
-sanic~=21.3.4
+sanic~=20.12.3
