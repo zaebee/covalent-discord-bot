@@ -1,7 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -12,20 +16,6 @@ import (
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esutil"
 )
-
-type Author struct {
-	ID       string
-	Username string
-	Avatar   string
-}
-
-type Meme struct {
-	ID        string
-	Url       string
-	Author    Author
-	Timestamp time.Time
-	Reactions []string
-}
 
 type Bot struct {
 	discordClient *discordgo.Session
@@ -38,7 +28,7 @@ func main() {
 	})
 	dg, err := discordgo.New("Bot " + os.Getenv("TOKEN"))
 	if err != nil {
-		fmt.Println("error creating Discord session,", err)
+		log.Println("error creating Discord session,", err)
 		return
 	}
 	bot := Bot{dg, es}
@@ -48,10 +38,10 @@ func main() {
 	bot.discordClient.AddHandler(bot.messageReactionAdd)
 	// Open a websocket connection to Discord and begin listening.
 	if err := dg.Open(); err != nil {
-		fmt.Println("error opening connection,", err)
+		log.Println("error opening connection,", err)
 		return
 	}
-	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
+	log.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
@@ -70,16 +60,18 @@ func (b *Bot) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		Avatar:   m.Author.Avatar,
 	}
 	if len(m.Attachments) > 0 {
-		fmt.Printf("New meme from author: %+v\n", m.Author)
+		log.Printf("New meme from author: %+v\n", m.Author)
 		for _, a := range m.Attachments {
 			created, err := m.Timestamp.Parse()
 			if err != nil {
-				fmt.Printf("unable convert timestamp %v: %v", m.Timestamp, err)
+				log.Printf("unable convert timestamp %v: %v", m.Timestamp, err)
 			}
-			if err := b.saveMeme(m.ID, a.URL, author, created); err == nil {
-				answer := fmt.Sprintf("Jaja! Your meme was saved `%v`\nCheck it https://cqt-memes.herokuapp.com/", a.URL)
-				s.ChannelMessageSend(m.ChannelID, answer)
+			if err := b.saveMeme(m.ID, a.URL, author, created); err != nil {
+				s.ChannelMessageSend(m.ChannelID, err.Error())
+				return
 			}
+			answer := fmt.Sprintf("Jaja! Your meme was saved `%v`\nCheck it https://cqt-memes.herokuapp.com/", a.URL)
+			s.ChannelMessageSend(m.ChannelID, answer)
 		}
 	}
 	// If the message is "ping" reply with "Pong!"
@@ -101,7 +93,7 @@ func (b *Bot) messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReact
       }
   }`, m.UserID)
 	res, _ := b.elasticClient.Update("memes", m.MessageID, strings.NewReader(data), b.elasticClient.Update.WithPretty())
-	fmt.Printf("saved user reaction %+v for meme %v: %v\n", m.UserID, m.MessageID, res)
+	log.Printf("saved user reaction %+v for meme %v: %v\n", m.UserID, m.MessageID, res)
 }
 
 func (b *Bot) saveMeme(msgID, url string, author Author, ts time.Time) error {
@@ -112,7 +104,56 @@ func (b *Bot) saveMeme(msgID, url string, author Author, ts time.Time) error {
 		Timestamp: ts,
 		Reactions: []string{},
 	}
+	if hash, _ := imageHash(url); hash != "" {
+		meme.ImageHash = hash
+		similar, err := b.duplicates(hash)
+		if err != nil {
+			log.Printf("request find duplicates failed: %v", err)
+		}
+		if len(similar) > 0 {
+			return fmt.Errorf(":japanese_ogre: hey jojo! we already have had this meme :japanese_ogre: ")
+		}
+	}
 	res, err := b.elasticClient.Index("memes", esutil.NewJSONReader(&meme), b.elasticClient.Index.WithDocumentID(msgID))
-	fmt.Printf("saved meme %+v: %v\n", meme, res)
+	log.Printf("saved meme %+v: %v\n", meme, res)
 	return err
+}
+
+func (b *Bot) duplicates(hash string) ([]*SearchHit, error) {
+	query := map[string]interface{}{
+		"query": map[string]interface{}{
+			"match": map[string]interface{}{
+				"ImageHash": hash,
+			},
+		},
+	}
+	res, err := b.elasticClient.Search(
+		b.elasticClient.Search.WithIndex("memes"),
+		b.elasticClient.Search.WithBody(esutil.NewJSONReader(&query)),
+		b.elasticClient.Search.WithPretty(),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	var sr SearchResponse
+	if err := json.NewDecoder(res.Body).Decode(&sr); err != nil {
+		return nil, err
+	}
+	return sr.Hits.Hits, nil
+}
+
+func imageHash(u string) (string, error) {
+	apiUrl := fmt.Sprintf("%v/hash?", os.Getenv("ELASTICSEARCH_URL"))
+	params := url.Values{}
+	params.Add("url", u)
+	resp, err := http.Get(apiUrl + params.Encode())
+	if err != nil {
+		log.Printf("request hash url failed: %v", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+	var out ImageHash
+	json.NewDecoder(resp.Body).Decode(&out)
+	return out.Hash, nil
 }
