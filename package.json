@@ -7,7 +7,11 @@
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",
-    "heroku-postbuild": "nuxt generate"
+    "heroku-postbuild": "nuxt generate",
+    "lint:eslint": "eslint --fix --ext .js,.vue --ignore-path .gitignore .",
+    "lint:prettier": "prettier --write --loglevel warn \"**/*.{js,json,css,scss,vue,html,md}\" --ignore-path .gitignore .",
+    "lint:stylelint": "stylelint --fix \"**/*.{vue,scss}\" --ignore-path .gitignore .",
+    "lint": "run-s lint:*"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.13.1",
@@ -21,8 +25,26 @@
     "@nuxt/typescript-build": "^2.1.0",
     "@nuxtjs/moment": "^1.6.1",
     "@nuxtjs/style-resources": "^1.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.23.0",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.26.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-loader": "^4.0.2",
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-vue": "^7.9.0",
     "fibers": "^5.0.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.19.1",
     "sass": "^1.32.12",
-    "sass-loader": "^10.1.1"
+    "sass-loader": "^10.1.1",
+    "stylelint": "^13.13.1",
+    "stylelint-config-prettier": "^8.0.2",
+    "stylelint-config-sass-guidelines": "^8.0.0",
+    "stylelint-config-standard": "^22.0.0",
+    "stylelint-csstree-validator": "^1.9.0",
+    "stylelint-order": "^4.1.0",
+    "stylelint-prettier": "^1.2.0",
+    "stylelint-scss": "^3.19.0"
   }
 }

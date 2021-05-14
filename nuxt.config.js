@@ -9,32 +9,29 @@ export default {
   head: {
     title: 'memes',
     htmlAttrs: {
-      lang: 'en'
+      lang: 'en',
     },
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '' }
+      { hid: 'description', name: 'description', content: '' },
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
       { rel: 'preconnect', href: 'https://fonts.gstatic.com' },
       {
         rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700&display=swap'
-      }
-    ]
+        href:
+          'https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;700&display=swap',
+      },
+    ],
   },
 
   // Global CSS: https://go.nuxtjs.dev/config-css
-  css: [
-    '~/assets/style/scss/main.scss',
-  ],
+  css: ['~/assets/style/scss/main.scss'],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [
-    '~/filters/pluralize.js',
-  ],
+  plugins: ['~/filters/pluralize.js'],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -45,7 +42,7 @@ export default {
   axios: {
     timeout: 30000,
     baseURL: process.env.ELASTICSEARCH_URL,
-    headers: {'X-Requested-With': 'XMLHttpRequest'},
+    headers: { 'X-Requested-With': 'XMLHttpRequest' },
   },
 
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
@@ -64,8 +61,7 @@ export default {
   ],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {
-  },
+  build: {},
 
   bootstrapVue: {
     bootstrapCSS: false,
