@@ -1,13 +1,11 @@
 #!/usr/bin/env python
+import json
 import requests
 import six
 import imagehash
 
 from PIL import Image
-from sanic import Sanic
-from sanic.response import json
-
-app = Sanic()
+from http.server import BaseHTTPRequestHandler
 
 
 def alpha_remover(image):
@@ -23,14 +21,23 @@ def image_loader(content):
     return imagehash.colorhash(image)
 
 
-@app.route('/')
-async def index(request):
+class handler(BaseHTTPRequestHandler):
+
+  def do_GET(self):
+    self.send_response(200)
+    self.send_header('Content-type', 'text/plain')
+    self.end_headers()
+    self.wfile.write('test')
+    return
+
+
+def hash_image(url):
     image_hash = ''
-    url = request.args.get('url')
+    # url = request.args.get('url')
     if url:
         response = requests.get(url)
         if response.status_code == 200:
             image_hash = image_loader(response.content)
-    return json({
+    return json.dumps({
       'url': url,
       'hash': str(image_hash)})
