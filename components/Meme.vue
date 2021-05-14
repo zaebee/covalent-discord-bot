@@ -15,7 +15,7 @@
     </b-card-body>
     <b-card-footer footer-class="d-flex px-3 py-2 card-footer">
       <small class="text-muted">Created {{ $moment(meme.Timestamp).fromNow() }}</small>
-      <small class="ml-auto mr-0 text-muted text-right">{{ reactionAmount }} {{ reactionAmount | pluralize('reaction') }}</small>
+      <small class="ml-auto mr-0 text-muted text-right">{{ meme.Reactions.length }} {{ meme.Reactions.length | pluralize('reaction') }}</small>
     </b-card-footer>
   </b-card>
 </template>
@@ -33,6 +33,7 @@ interface Meme {
   Url: string
   Author: User
   Timestamp: Date
+  Reactions: string[]
 }
 
 export default Vue.extend({
@@ -44,9 +45,7 @@ export default Vue.extend({
     } as PropOptions<Meme>
   },
   data() {
-    return {
-      reactionAmount: 2,
-    }
+    return {}
   },
   computed: {
     avatar () {
