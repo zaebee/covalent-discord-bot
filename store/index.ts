@@ -12,25 +12,35 @@ export type RootState = ReturnType<typeof state>
 
 export const getters: GetterTree<RootState, RootState> = {
   total: state => state.total,
-  hasNext: state => state.memes.length < state.total
+  hasNext: state => state.memes.length < state.total,
 }
 
 export const mutations: MutationTree<RootState> = {
   SET_TOTAL: (state, newTotal: number) => (state.total = newTotal),
   INIT_MEMES: (state, memes: Object[]) => (state.memes = memes),
-  MORE_MEMES: (state, memes: Object[]) => (state.memes = state.memes.concat(memes)),
+  MORE_MEMES: (state, memes: Object[]) =>
+    (state.memes = state.memes.concat(memes)),
 }
 
 export const actions: ActionTree<RootState, RootState> = {
   async fetchMemes({ commit }, payload) {
-    let page =(payload && payload.page) || 0
-    const memes = await $http.post('/memes/_search', {
+    const { page = 0, userName } = payload
+    const params: any = {
       from: page * this.state.pageSize,
       size: this.state.pageSize,
-      sort: {Timestamp: {order: 'desc'}}
-    })
+      sort: { Timestamp: { order: 'desc' } },
+    }
+    if (userName) {
+      params.query = {
+        match: {
+          'Author.Username': userName,
+        },
+      }
+    }
+
+    const memes = await $http.post('/memes/_search', params)
     console.log(memes.data.hits.hits)
-    if (page == 0) {
+    if (page === 0) {
       commit('INIT_MEMES', memes.data.hits.hits)
     } else {
       commit('MORE_MEMES', memes.data.hits.hits)
@@ -38,19 +48,33 @@ export const actions: ActionTree<RootState, RootState> = {
     commit('SET_TOTAL', memes.data.hits.total)
   },
   async fetchTopMemes({ commit }, payload) {
-    let page =(payload && payload.page) || 0
-    const memes = await $http.post('/memes/_search', {
+    const { page = 0, userName } = payload
+    const params: any = {
       query: {
         bool: {
-          filter: [{exists: {field: 'Reactions'}}]
+          filter: [{ exists: { field: 'Reactions' } }],
         },
       },
       from: page * this.state.pageSize,
       size: this.state.pageSize,
-      sort: {'Reactions.keyword': {order: 'desc'}}
-    })
+      sort: { 'Reactions.keyword': { order: 'desc' } },
+    }
+
+    if (userName) {
+      Object.assign(params.query.bool, {
+        must: [
+          {
+            match: {
+              'Author.Username': userName,
+            },
+          },
+        ],
+      })
+    }
+
+    const memes = await $http.post('/memes/_search', params)
     console.log(memes.data.hits.hits)
-    if (page == 0) {
+    if (page === 0) {
       commit('INIT_MEMES', memes.data.hits.hits)
     } else {
       commit('MORE_MEMES', memes.data.hits.hits)
