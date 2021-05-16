@@ -2,14 +2,26 @@
   <div class="border-bottom p-2">
     <b-nav pills>
       <b-nav-item
-        to="/"
+        v-if="$route.query.userName"
+        :to="$route.query.sort ? { query: { sort: $route.query.sort } } : '/'"
+        class="nav-item mr-1"
+        exact
+        exact-active-class="nav-link--active"
+        >Back to all Users</b-nav-item
+      >
+      <b-nav-item
+        :to="
+          $route.query.userName
+            ? { query: { userName: $route.query.userName } }
+            : '/'
+        "
         class="nav-item mr-1"
         exact
         exact-active-class="nav-link--active"
         >New</b-nav-item
       >
       <b-nav-item
-        to="top"
+        :to="{ query: { ...$route.query, sort: 'top' } }"
         class="nav-item"
         exact
         exact-active-class="nav-link--active"
@@ -28,10 +40,11 @@ export default {
 <style lang="scss" scoped>
 .nav-pills {
   .nav-link {
-    color: #fff;
     border-radius: 20px;
+    color: #fff;
     line-height: 15px;
     padding: 0.5rem 1.5rem;
+    transition: all 0.2s;
 
     &:hover {
       background-color: var(--color-covalent-gray);
