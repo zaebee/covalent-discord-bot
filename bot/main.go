@@ -68,7 +68,7 @@ func (b *Bot) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				log.Printf("unable convert timestamp %v: %v", m.Timestamp, err)
 			}
 			answer := fmt.Sprintf("Jaja! Your meme was saved `%v`\nCheck it https://cqt-memes.herokuapp.com/", a.URL)
-			if err := b.saveMeme(m.ID, a.URL, author, created); err != nil {
+			if err := b.saveMeme(m.ID, a.URL, author, created, []string{}); err != nil {
 				answer = err.Error()
 			}
 			s.ChannelMessageSend(m.ChannelID, answer)
@@ -77,6 +77,13 @@ func (b *Bot) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// If the message is "ping" reply with "Pong!"
 	if m.Content == "ping" {
 		s.ChannelMessageSend(m.ChannelID, "Pong!")
+	}
+	// If the message is "ping" reply with "Pong!"
+	if m.Content == "!sync" {
+		messages := b.readHistory(s, m.ChannelID, m.ID)
+		memes := b.saveHistoryMemes(messages)
+		res := fmt.Sprintf("History synced. saved %d memes", len(memes))
+		s.ChannelMessageSend(m.ChannelID, res)
 	}
 }
 
@@ -96,13 +103,59 @@ func (b *Bot) messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReact
 	log.Printf("saved user reaction %+v for meme %v: %v\n", m.UserID, m.MessageID, res)
 }
 
-func (b *Bot) saveMeme(msgID, url string, author model.Author, ts time.Time) error {
+func (b *Bot) readHistory(s *discordgo.Session, channelID, msgID string) []*discordgo.Message {
+	var result []*discordgo.Message
+	var fetch func(beforeMsgID string)
+	fetch = func(beforeMsgID string) {
+		messages, err := s.ChannelMessages(channelID, 100, beforeMsgID, "", "")
+		if err != nil {
+			log.Printf("while read history: %v", err)
+			return
+		}
+		if len(messages) == 0 {
+			return
+		}
+		result = append(result, messages...)
+		lastMsg := messages[len(messages)-1]
+		fetch(lastMsg.ID)
+	}
+	fetch(msgID)
+	return result
+}
+
+func (b *Bot) saveHistoryMemes(messages []*discordgo.Message) []model.Meme {
+	var memes []model.Meme
+	for _, m := range messages {
+		author := model.Author{
+			ID:       m.Author.ID,
+			Avatar:   m.Author.Avatar,
+			Username: m.Author.Username,
+		}
+		var reactions []string
+		for _, r := range m.Reactions {
+			reactions = append(reactions, r.Emoji.Name)
+		}
+		if len(m.Attachments) == 1 {
+			attach := m.Attachments[0]
+			created, _ := m.Timestamp.Parse()
+			go b.saveMeme(m.ID, attach.URL, author, created, reactions)
+			meme := model.Meme{
+				ID: m.ID,
+			}
+			memes = append(memes, meme)
+		}
+	}
+	fmt.Printf("got %d memes from history\n", len(memes))
+	return memes
+}
+
+func (b *Bot) saveMeme(msgID, url string, author model.Author, ts time.Time, reactions []string) error {
 	meme := model.Meme{
 		ID:        msgID,
 		Url:       url,
 		Author:    author,
 		Timestamp: ts,
-		Reactions: []string{},
+		Reactions: reactions,
 	}
 	if hash := imageHash(url); hash != "" {
 		meme.ImageHash = hash
@@ -111,11 +164,16 @@ func (b *Bot) saveMeme(msgID, url string, author model.Author, ts time.Time) err
 			log.Printf("request find duplicates failed: %v", err)
 		}
 		if len(similar) > 0 {
+			fmt.Printf(":japanese_ogre: hey jojo! we already have had this meme :japanese_ogre: ")
 			return fmt.Errorf(":japanese_ogre: hey jojo! we already have had this meme :japanese_ogre: ")
 		}
 	}
-	res, err := b.elasticClient.Index("memes", esutil.NewJSONReader(&meme), b.elasticClient.Index.WithDocumentID(msgID))
-	log.Printf("saved meme %+v: %v\n", meme, res)
+	res, err := b.elasticClient.Index(
+		"memes_history",
+		esutil.NewJSONReader(&meme),
+		b.elasticClient.Index.WithDocumentID(msgID),
+		b.elasticClient.Index.WithRefresh("true"))
+	log.Printf("saved meme %v: %v\n", meme.Url, res)
 	return err
 }
 
@@ -128,7 +186,7 @@ func (b *Bot) duplicates(hash string) ([]*model.SearchHit, error) {
 		},
 	}
 	res, err := b.elasticClient.Search(
-		b.elasticClient.Search.WithIndex("memes"),
+		b.elasticClient.Search.WithIndex("memes_history"),
 		b.elasticClient.Search.WithBody(esutil.NewJSONReader(&query)),
 		b.elasticClient.Search.WithPretty(),
 	)
