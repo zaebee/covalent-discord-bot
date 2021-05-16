@@ -150,7 +150,7 @@ func (b *Bot) topAuthors() (string, error) {
 				if authors, ok := buckets.([]interface{}); ok {
 					for i, a := range authors {
 						if m, ok := a.(map[string]interface{}); ok {
-							username, _ := m["key"]
+							username := m["key"]
 							count := m["doc_count"]
 							msg := fmt.Sprintf("%d @%v: (%v memes)", i+1, username, count)
 							result = append(result, msg)
