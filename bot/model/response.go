@@ -15,9 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-package main
-
-import "time"
+package model
 
 type ErrorResponse struct {
 	Info *ErrorInfo `json:"error,omitempty"`
@@ -52,24 +50,4 @@ type SearchHit struct {
 	Version int64   `json:"_version,omitempty"`
 
 	Source Meme `json:"_source"`
-}
-
-type Meme struct {
-	ID        string
-	Url       string
-	ImageHash string
-	Author    Author
-	Timestamp time.Time
-	Reactions []string
-}
-
-type Author struct {
-	ID       string
-	Username string
-	Avatar   string
-}
-
-type ImageHash struct {
-	Url  string `json:"url"`
-	Hash string `json:"hash"`
 }
