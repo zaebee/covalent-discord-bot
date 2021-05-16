@@ -207,6 +207,9 @@ func (b *Bot) saveHistoryMemes(messages []*discordgo.Message) []model.Meme {
 }
 
 func (b *Bot) saveMeme(msgID, url string, author model.Author, ts time.Time, reactions []string) error {
+	if reactions == nil {
+		reactions = []string{}
+	}
 	meme := model.Meme{
 		ID:        msgID,
 		Url:       url,
