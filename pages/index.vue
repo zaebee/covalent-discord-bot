@@ -1,14 +1,8 @@
 <template>
   <b-container>
     <b-row>
-      <b-col
-        v-for="meme in getMemes"
-        :key="meme._id"
-        sm="6"
-        lg="4"
-      >
-        <Meme
-          :meme="meme._source"/>
+      <b-col v-for="meme in getMemes" :key="meme._id" sm="6" lg="4">
+        <Meme :meme="meme._source" />
       </b-col>
     </b-row>
     <div class="text-center" v-show="hasNext">
@@ -35,12 +29,12 @@
 <script lang="ts">
 import Vue from 'vue'
 import { RootState } from '~/store'
-import Meme from "~/components/Meme.vue"
+import Meme from '~/components/Meme.vue'
 
 export default Vue.extend({
   name: 'New',
   components: { Meme },
-  async fetch ({ store }) {
+  async fetch({ store }) {
     await store.dispatch('fetchMemes', { page: 0 })
   },
   data() {
@@ -50,12 +44,12 @@ export default Vue.extend({
     }
   },
   computed: {
-    hasNext () {
-      return (this.$store.getters.hasNext as boolean)
+    hasNext() {
+      return this.$store.getters.hasNext as boolean
     },
-    getMemes () {
+    getMemes() {
       return (this.$store.state as RootState).memes
-    }
+    },
   },
   methods: {
     showMore() {
@@ -64,14 +58,18 @@ export default Vue.extend({
         this.nextPage += 1
         this.busy = false
       })
-    }
-  }
+    },
+  },
 })
 </script>
 
 <style lang="scss">
 .covalent-button-pink {
-  background-image: linear-gradient(to top, var(--color-covalent-turquoise) 50%, var(--color-covalent-pink) 50%);
+  background-image: linear-gradient(
+    to top,
+    var(--color-covalent-turquoise) 50%,
+    var(--color-covalent-pink) 50%
+  );
   background-size: 100% 200%;
   border-radius: $border-radius;
   color: white;
@@ -82,8 +80,8 @@ export default Vue.extend({
   transition: background-position 0.2s;
 
   &:hover {
-     background-position: 0 100%;
-     color: #000426;
-   }
+    background-position: 0 100%;
+    color: #000426;
+  }
 }
 </style>

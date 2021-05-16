@@ -1,11 +1,11 @@
 <template>
   <div id="app">
     <b-container class="text-center">
-      <logo />
+      <Logo />
       <h1 class="title mb-4">
         Memes
       </h1>
-      <navbar class="mb-4" />
+      <Navbar class="mb-4" />
     </b-container>
     <Nuxt />
   </div>
@@ -24,7 +24,8 @@ export default Vue.extend({
 <style lang="scss" scoped>
 @font-face {
   font-family: 'What is this - some kind of joke';
-  src: url('~/assets/fonts/What is this - some kind of joke.ttf') format('truetype');
+  src: url('~/assets/fonts/What is this - some kind of joke.ttf')
+    format('truetype');
 }
 
 .title {
