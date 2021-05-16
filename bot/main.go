@@ -110,8 +110,8 @@ func (b *Bot) messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReact
 	res, _ := b.elasticClient.Update(
 		"memes",
 		m.MessageID,
-		strings.NewReader(data))
-	//b.elasticClient.Update.WithPretty())
+		strings.NewReader(data),
+		b.elasticClient.Update.WithPretty())
 	log.Printf("saved user reaction %+v for meme %v: %v\n", m.UserID, m.MessageID, res)
 }
 
@@ -138,13 +138,6 @@ func (b *Bot) topAuthors() (string, error) {
 	var sr model.SearchResponse
 	if err := json.NewDecoder(res.Body).Decode(&sr); err != nil {
 		return "nil", err
-	}
-	_ = map[int]string{
-		1: ":first_place:",
-		2: ":second_place:",
-		3: ":third_place:",
-		4: ":four:",
-		5: ":five:",
 	}
 	m, ok := sr.Aggregations.(map[string]interface{})
 	if !ok {
