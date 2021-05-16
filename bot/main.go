@@ -78,7 +78,7 @@ func (b *Bot) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Content == "ping" {
 		s.ChannelMessageSend(m.ChannelID, "Pong!")
 	}
-	// If the message is "ping" reply with "Pong!"
+	// If the message is "!sync" collect memes from history."
 	if m.Content == "!sync" {
 		messages := b.readHistory(s, m.ChannelID, m.ID)
 		memes := b.saveHistoryMemes(messages)
@@ -99,7 +99,11 @@ func (b *Bot) messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReact
         }
       }
   }`, m.UserID)
-	res, _ := b.elasticClient.Update("memes", m.MessageID, strings.NewReader(data), b.elasticClient.Update.WithPretty())
+	res, _ := b.elasticClient.Update(
+		"memes",
+		m.MessageID,
+		strings.NewReader(data),
+		b.elasticClient.Update.WithPretty())
 	log.Printf("saved user reaction %+v for meme %v: %v\n", m.UserID, m.MessageID, res)
 }
 
@@ -139,10 +143,7 @@ func (b *Bot) saveHistoryMemes(messages []*discordgo.Message) []model.Meme {
 			attach := m.Attachments[0]
 			created, _ := m.Timestamp.Parse()
 			go b.saveMeme(m.ID, attach.URL, author, created, reactions)
-			meme := model.Meme{
-				ID: m.ID,
-			}
-			memes = append(memes, meme)
+			memes = append(memes, model.Meme{ID: m.ID})
 		}
 	}
 	fmt.Printf("got %d memes from history\n", len(memes))
@@ -164,8 +165,9 @@ func (b *Bot) saveMeme(msgID, url string, author model.Author, ts time.Time, rea
 			log.Printf("request find duplicates failed: %v", err)
 		}
 		if len(similar) > 0 {
-			fmt.Printf(":japanese_ogre: hey jojo! we already have had this meme :japanese_ogre: ")
-			return fmt.Errorf(":japanese_ogre: hey jojo! we already have had this meme :japanese_ogre: ")
+			msg := ":japanese_ogre: hey jojo! we already have had this meme :japanese_ogre: "
+			log.Println(msg)
+			return fmt.Errorf(msg)
 		}
 	}
 	res, err := b.elasticClient.Index(
