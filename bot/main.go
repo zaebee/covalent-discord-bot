@@ -169,7 +169,7 @@ func (b *Bot) saveMeme(msgID, url string, author model.Author, ts time.Time, rea
 		}
 	}
 	res, err := b.elasticClient.Index(
-		"memes_history",
+		"memes",
 		esutil.NewJSONReader(&meme),
 		b.elasticClient.Index.WithDocumentID(msgID),
 		b.elasticClient.Index.WithRefresh("true"))
@@ -186,7 +186,7 @@ func (b *Bot) duplicates(hash string) ([]*model.SearchHit, error) {
 		},
 	}
 	res, err := b.elasticClient.Search(
-		b.elasticClient.Search.WithIndex("memes_history"),
+		b.elasticClient.Search.WithIndex("memes"),
 		b.elasticClient.Search.WithBody(esutil.NewJSONReader(&query)),
 		b.elasticClient.Search.WithPretty(),
 	)
