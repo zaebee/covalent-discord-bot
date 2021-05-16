@@ -13,7 +13,7 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
-bin
+bot/bin
 # Created by .ignore support plugin (hsz.mobi)
 ### Node template
 # Logs
