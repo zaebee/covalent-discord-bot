@@ -11,6 +11,7 @@ type Meme struct {
 	Author    Author
 	Timestamp time.Time
 	Reactions []string
+	Rating    int
 }
 
 // Author implements meme author.
