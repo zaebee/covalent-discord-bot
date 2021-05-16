@@ -160,9 +160,7 @@ func (b *Bot) topAuthors() (string, error) {
 			}
 		}
 	}
-	out := strings.Join(result[:], "\n")
-	log.Printf("top authors: %v", out)
-	return out, nil
+	return strings.Join(result[:], "\n"), nil
 }
 
 func (b *Bot) readHistory(s *discordgo.Session, channelID, msgID string) []*discordgo.Message {
