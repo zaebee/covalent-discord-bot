@@ -85,6 +85,14 @@ func (b *Bot) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		res := fmt.Sprintf("History synced. saved %d memes", len(memes))
 		s.ChannelMessageSend(m.ChannelID, res)
 	}
+	if m.Content == "!top" {
+		top, err := b.topAuthors()
+		res := "Uh.. We don't have memes :cry: Try to upload something?"
+		if err == nil && top != "" {
+			res = fmt.Sprintf("Top meme makers:```%s```", top)
+		}
+		s.ChannelMessageSend(m.ChannelID, res)
+	}
 }
 
 // This function will be called (due to AddHandler above) every time a new
@@ -92,7 +100,7 @@ func (b *Bot) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 func (b *Bot) messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 	data := fmt.Sprintf(`{
     "script": {
-		    "source": "if (!ctx._source.Reactions.contains(params.reaction)) { ctx._source.Reactions.add(params.reaction) }",
+		    "source": "if (!ctx._source.Reactions.contains(params.reaction)) { ctx._source.Reactions.add(params.reaction); ctx._source.Rating += 1 }",
 		    "lang": "painless",
 		    "params": {
 		      "reaction": "%s"
@@ -105,6 +113,54 @@ func (b *Bot) messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReact
 		strings.NewReader(data),
 		b.elasticClient.Update.WithPretty())
 	log.Printf("saved user reaction %+v for meme %v: %v\n", m.UserID, m.MessageID, res)
+}
+
+func (b *Bot) topAuthors() (string, error) {
+	query := map[string]interface{}{
+		"size": 0,
+		"aggs": map[string]interface{}{
+			"byAuthor": map[string]interface{}{
+				"terms": map[string]interface{}{
+					"field": "Author.Username.keyword",
+				},
+			},
+		},
+	}
+	res, err := b.elasticClient.Search(
+		b.elasticClient.Search.WithIndex("memes"),
+		b.elasticClient.Search.WithBody(esutil.NewJSONReader(&query)),
+		b.elasticClient.Search.WithPretty(),
+	)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+	var sr model.SearchResponse
+	if err := json.NewDecoder(res.Body).Decode(&sr); err != nil {
+		return "nil", err
+	}
+	m, ok := sr.Aggregations.(map[string]interface{})
+	if !ok {
+		return "", fmt.Errorf("want type map[string]interface{};  got %T", sr.Aggregations)
+	}
+	var result []string
+	if byAuthor, ok := m["byAuthor"]; ok {
+		if m, ok := byAuthor.(map[string]interface{}); ok {
+			if buckets, ok := m["buckets"]; ok {
+				if authors, ok := buckets.([]interface{}); ok {
+					for i, a := range authors {
+						if m, ok := a.(map[string]interface{}); ok {
+							username := m["key"]
+							count := m["doc_count"]
+							msg := fmt.Sprintf("%d @%v: (%v memes)", i+1, username, count)
+							result = append(result, msg)
+						}
+					}
+				}
+			}
+		}
+	}
+	return strings.Join(result[:], "\n"), nil
 }
 
 func (b *Bot) readHistory(s *discordgo.Session, channelID, msgID string) []*discordgo.Message {
@@ -157,6 +213,7 @@ func (b *Bot) saveMeme(msgID, url string, author model.Author, ts time.Time, rea
 		Author:    author,
 		Timestamp: ts,
 		Reactions: reactions,
+		Rating:    len(reactions),
 	}
 	if hash := imageHash(url); hash != "" {
 		meme.ImageHash = hash
@@ -214,6 +271,8 @@ func imageHash(u string) string {
 	}
 	defer resp.Body.Close()
 	var out model.ImageHash
-	json.NewDecoder(resp.Body).Decode(&out)
+	if err = json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		return ""
+	}
 	return out.Hash
 }
