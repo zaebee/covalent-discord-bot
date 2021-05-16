@@ -7,7 +7,7 @@
     class="border-0 mb-4"
     no-body
   >
-    <b-card-body class="px-3 py-2">
+    <b-card-body class="px-3 py-2 position-relative">
       <b-card-title class="mb-0 text-break text-center">
         <NuxtLink
           :to="{ query: { ...$route.query, userName: meme.Author.Username } }"
@@ -17,6 +17,7 @@
           }}</NuxtLink
         >
       </b-card-title>
+      <share :img-url="meme.Url" :user-name="meme.Author.Username" class="position-absolute card-share" />
     </b-card-body>
     <b-card-footer footer-class="d-flex px-3 py-2 card-footer">
       <small class="text-muted"
@@ -32,6 +33,7 @@
 
 <script lang="ts">
 import Vue, { PropOptions } from 'vue'
+import Share from '~/components/Share.vue'
 
 interface User {
   ID: string
@@ -48,6 +50,7 @@ interface Meme {
 
 export default Vue.extend({
   name: 'Meme',
+  components: { Share },
   props: {
     meme: {
       type: Object,
@@ -73,6 +76,11 @@ export default Vue.extend({
 .card-img-top {
   max-height: 500px;
   object-fit: contain;
+}
+
+.card-share {
+  right: 0.5rem;
+  top: -1.125rem;
 }
 
 .link-title {

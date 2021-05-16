@@ -50,6 +50,18 @@ export default {
     // https://go.nuxtjs.dev/typescript
     '@nuxt/typescript-build',
     '@nuxtjs/moment',
+    [
+      'nuxt-fontawesome',
+      {
+        component: 'fa',
+        imports: [
+          {
+            set: '@fortawesome/free-brands-svg-icons',
+            icons: ['faFacebookF', 'faTelegramPlane', 'faTwitter'],
+          },
+        ],
+      },
+    ],
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
@@ -58,6 +70,7 @@ export default {
     // https://go.nuxtjs.dev/bootstrap
     'bootstrap-vue/nuxt',
     '@nuxtjs/style-resources',
+    'vue-social-sharing/nuxt',
   ],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
