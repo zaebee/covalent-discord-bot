@@ -41,6 +41,7 @@ type SearchResponse struct {
 		Total int64
 		Hits  []*SearchHit
 	}
+	Aggregations interface{} `json:"aggregations"`
 }
 
 type SearchHit struct {
