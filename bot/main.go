@@ -19,6 +19,8 @@ import (
 	"github.com/zaebee/covalent-discord-bot/bot/model"
 )
 
+var frontendUrl = os.Getenv("FRONTEND_URL")
+
 type Bot struct {
 	discordClient *discordgo.Session
 	elasticClient *elasticsearch.Client
@@ -67,7 +69,7 @@ func (b *Bot) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if err != nil {
 				log.Printf("unable convert timestamp %v: %v", m.Timestamp, err)
 			}
-			answer := fmt.Sprintf("Jaja! Your meme was saved `%v`\nCheck it https://cqt-memes.herokuapp.com/", a.URL)
+			answer := fmt.Sprintf("Jaja! Your meme was saved `%v`\nCheck it %s", a.URL, frontendUrl)
 			if err := b.saveMeme(m.ID, a.URL, author, created, []string{}); err != nil {
 				answer = err.Error()
 			}
