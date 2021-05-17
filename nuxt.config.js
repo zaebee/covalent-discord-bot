@@ -71,10 +71,19 @@ export default {
     'bootstrap-vue/nuxt',
     '@nuxtjs/style-resources',
     'vue-social-sharing/nuxt',
+    '@nuxtjs/yandex-metrika',
   ],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
+
+  yandexMetrika:  {
+    id: '78757767',
+    webvisor: true,
+    clickmap: true,
+    trackLinks: true,
+    accurateTrackBounce: true,
+  },
 
   bootstrapVue: {
     bootstrapCSS: false,
