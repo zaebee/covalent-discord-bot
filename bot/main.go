@@ -19,7 +19,12 @@ import (
 	"github.com/zaebee/covalent-discord-bot/bot/model"
 )
 
-var frontendUrl = os.Getenv("FRONTEND_URL")
+var (
+	frontendUrl      = os.Getenv("FRONTEND_URL")
+	elasticsearchUrl = os.Getenv("ELASTICSEARCH_URL")
+	imageHashUrl     = os.Getenv("IMAGE_HASH_URL")
+	discordToken     = os.Getenv("DISCORD_TOKEN")
+)
 
 type Bot struct {
 	discordClient *discordgo.Session
@@ -28,9 +33,9 @@ type Bot struct {
 
 func main() {
 	es, err := elasticsearch.NewClient(elasticsearch.Config{
-		Addresses: []string{os.Getenv("ELASTICSEARCH_URL")},
+		Addresses: []string{elasticsearchUrl},
 	})
-	dg, err := discordgo.New("Bot " + os.Getenv("TOKEN"))
+	dg, err := discordgo.New("Bot " + discordToken)
 	if err != nil {
 		log.Println("error creating Discord session,", err)
 		return
@@ -99,7 +104,7 @@ func (b *Bot) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 // This function will be called (due to AddHandler above) every time a new
 // reaction is created on any message that the authenticated bot has access to.
-func (b *Bot) messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
+func (b *Bot) messageReactionAdd(_ *discordgo.Session, m *discordgo.MessageReactionAdd) {
 	data := fmt.Sprintf(`{
     "script": {
 		    "source": "if (!ctx._source.Reactions.contains(params.reaction)) { ctx._source.Reactions.add(params.reaction); ctx._source.Rating += 1 }",
@@ -185,6 +190,7 @@ func (b *Bot) readHistory(s *discordgo.Session, channelID, msgID string) []*disc
 	return result
 }
 
+// saveHistoryMemes saves messages with attachments into elasticsearch storage.
 func (b *Bot) saveHistoryMemes(messages []*discordgo.Message) []model.Meme {
 	var memes []model.Meme
 	for _, m := range messages {
@@ -204,10 +210,11 @@ func (b *Bot) saveHistoryMemes(messages []*discordgo.Message) []model.Meme {
 			memes = append(memes, model.Meme{ID: m.ID})
 		}
 	}
-	fmt.Printf("got %d memes from history\n", len(memes))
+	log.Printf("got %d memes from history\n", len(memes))
 	return memes
 }
 
+// saveMeme saves message into elasticsearch storage.
 func (b *Bot) saveMeme(msgID, url string, author model.Author, ts time.Time, reactions []string) error {
 	if reactions == nil {
 		reactions = []string{}
@@ -241,6 +248,7 @@ func (b *Bot) saveMeme(msgID, url string, author model.Author, ts time.Time, rea
 	return err
 }
 
+// duplicates returns Hits which have equal `hash`.
 func (b *Bot) duplicates(hash string) ([]*model.SearchHit, error) {
 	query := map[string]interface{}{
 		"query": map[string]interface{}{
@@ -266,7 +274,7 @@ func (b *Bot) duplicates(hash string) ([]*model.SearchHit, error) {
 }
 
 func imageHash(u string) string {
-	apiUrl := fmt.Sprintf("%v/hash?", os.Getenv("ELASTICSEARCH_URL"))
+	apiUrl := fmt.Sprintf("%v/hash?", imageHashUrl)
 	params := url.Values{}
 	params.Add("url", u)
 	resp, err := http.Get(apiUrl + params.Encode())

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import requests
 import six
 import imagehash
@@ -18,11 +17,6 @@ def alpha_remover(image):
     return canvas.convert('RGB')
 
 
-def image_loader(content):
-    image = alpha_remover(Image.open(six.BytesIO(content)))
-    return imagehash.colorhash(image)
-
-
 @app.route('/hash')
 async def index(request):
     image_hash = ''
@@ -30,7 +24,8 @@ async def index(request):
     if url:
         response = requests.get(url)
         if response.status_code == 200:
-            image_hash = image_loader(response.content)
+            image = alpha_remover(Image.open(six.BytesIO(response.content)))
+            image_hash = imagehash.colorhash(image)
     return json({
-      'url': url,
-      'hash': str(image_hash)})
+        'url': url,
+        'hash': str(image_hash)})
