@@ -33,7 +33,7 @@ export const actions: ActionTree<RootState, RootState> = {
     if (userName) {
       params.query = {
         match: {
-          'Author.Username': userName,
+          'Author.Username.keyword': userName,
         },
       }
     }
@@ -65,7 +65,7 @@ export const actions: ActionTree<RootState, RootState> = {
         must: [
           {
             match: {
-              'Author.Username': userName,
+              'Author.Username.keyword': userName,
             },
           },
         ],
