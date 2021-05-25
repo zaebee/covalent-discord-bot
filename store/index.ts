@@ -57,7 +57,7 @@ export const actions: ActionTree<RootState, RootState> = {
       },
       from: page * this.state.pageSize,
       size: this.state.pageSize,
-      sort: { 'Reactions.keyword': { order: 'desc' } },
+      sort: { 'Rating': { order: 'desc' } },
     }
 
     if (userName) {
