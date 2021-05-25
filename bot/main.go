@@ -24,6 +24,7 @@ var (
 	elasticsearchUrl = os.Getenv("ELASTICSEARCH_URL")
 	imageHashUrl     = os.Getenv("IMAGE_HASH_URL")
 	discordToken     = os.Getenv("DISCORD_TOKEN")
+	channelID        = os.Getenv("CHANNEL_ID")
 )
 
 type Bot struct {
@@ -60,6 +61,9 @@ func main() {
 // This function will be called (due to AddHandler above) every time a new
 // message is created on any channel that the authenticated bot has access to.
 func (b *Bot) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+	if m.ChannelID != channelID {
+		return
+	}
 	if m.Author.ID == s.State.User.ID {
 		return
 	}
@@ -78,6 +82,7 @@ func (b *Bot) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if err := b.saveMeme(m.ID, a.URL, author, created, []string{}); err != nil {
 				answer = err.Error()
 			}
+			fmt.Println(answer)
 			s.ChannelMessageSend(m.ChannelID, answer)
 		}
 	}
@@ -90,14 +95,16 @@ func (b *Bot) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		messages := b.readHistory(s, m.ChannelID, m.ID)
 		memes := b.saveHistoryMemes(messages)
 		res := fmt.Sprintf("History synced. saved %d memes", len(memes))
+		fmt.Println(res)
 		s.ChannelMessageSend(m.ChannelID, res)
 	}
 	if m.Content == "!top" {
 		top, err := b.topAuthors()
 		res := "Uh.. We don't have memes :cry: Try to upload something?"
 		if err == nil && top != "" {
-			res = fmt.Sprintf("Top meme makers:```%s```", top)
+			res = fmt.Sprintf("Top meme makers:\n```%s```", top)
 		}
+		fmt.Println(res)
 		s.ChannelMessageSend(m.ChannelID, res)
 	}
 }
@@ -105,6 +112,9 @@ func (b *Bot) messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 // This function will be called (due to AddHandler above) every time a new
 // reaction is created on any message that the authenticated bot has access to.
 func (b *Bot) messageReactionAdd(_ *discordgo.Session, m *discordgo.MessageReactionAdd) {
+	if m.ChannelID != channelID {
+		return
+	}
 	data := fmt.Sprintf(`{
     "script": {
 		    "source": "if (!ctx._source.Reactions.contains(params.reaction)) { ctx._source.Reactions.add(params.reaction); ctx._source.Rating += 1 }",
@@ -159,7 +169,7 @@ func (b *Bot) topAuthors() (string, error) {
 						if m, ok := a.(map[string]interface{}); ok {
 							username := m["key"]
 							count := m["doc_count"]
-							msg := fmt.Sprintf("%d @%v: (%v memes)", i+1, username, count)
+							msg := fmt.Sprintf("%d. @%v: (%v memes)", i+1, username, count)
 							result = append(result, msg)
 						}
 					}
