@@ -85,7 +85,7 @@ const VIDEO_EXT = [
 ]
 
 export default Vue.extend({
-  name: 'Meme',
+  name: 'Memes',
   components: { Share },
   props: {
     meme: {
@@ -105,27 +105,25 @@ export default Vue.extend({
         : ''
     },
     isImgMeme() {
-      const ext = this.getExt(this.meme.Url)
+      let ext = (this as any).getExt(this.meme.Url)
       return IMG_EXT.includes(ext)
     },
-    isVideoMeme() {
-      const ext = this.getExt(this.meme.Url)
+    isVideoMeme(): boolean {
+      const ext: string = (this as any).getExt(this.meme.Url)
       return VIDEO_EXT.includes(ext)
     },
   },
   methods: {
-    getExt(str) {
-      return str.split('.').pop().toLowerCase()
+    getExt: function (str: string): string {
+      const ext = str.split('.').pop()
+      if (ext) return ext.toLowerCase()
+      return ''
     },
   },
 })
 </script>
 
 <style lang="scss" scoped>
-.card-img-top {
-  max-height: 500px;
-  object-fit: contain;
-}
 
 .card-share {
   right: 0.5rem;
