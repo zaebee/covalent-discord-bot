@@ -7,6 +7,7 @@ A bot that is listening discord channel and stores messages with attachments (me
 Copy and update settings in `.env.example`
 ```shell
   set DISCORD_TOKEN=<bot_token>
+  set DISCORD_CHANNEL=<channel_id>
   set ELASTICSEARCH_URL=localhost:9200
   set FRONTEND_URL=https://covalent.me-mes.site
   set IMAGE_HASH_URL=localhost:8000
