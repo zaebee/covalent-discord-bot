@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
-    "@nuxt/types": "^2.15.6",
+    "@nuxt/types": "^2.15.7",
     "@nuxt/typescript-build": "^2.1.0",
     "@nuxtjs/moment": "^1.6.1",
     "@nuxtjs/style-resources": "^1.0.0",
